@@ -72,10 +72,13 @@ ueno_viewer::ueno_viewer(QWidget *parent)
 
 	QHBoxLayout *lay_stage = new QHBoxLayout();
 	lab_stg = new QLabel();
+	lab_stg->setFont(QFont("Arial", 10));
 	lay_stage->addWidget(lab_stg);
 	lab_stg_cl = new QLabel();
+	lab_stg_cl->setFont(QFont("Arial", 10));
 	lay_stage->addWidget(lab_stg_cl);
 	lab_stg_dr = new QLabel();
+	lab_stg_dr->setFont(QFont("Arial", 10));
 	lay_stage->addWidget(lab_stg_dr);
 	lay->addLayout(lay_stage, 5, 0, 1, 2);
 
@@ -373,11 +376,11 @@ void ueno_viewer::labMouseClicked(QMouseEvent* e){
 		lx = e->x();
 		ly = e->y();
 		lz = ipict;
-		lab_pix_cl->setText(QString("click: %1, %2, %3").arg(lx, 5, 10).arg(ly, 5, 10).arg(lz, 5, 10));
+		lab_pix_cl->setText(QString("click: %1, %2, %3").arg(lx, 5, 10).arg(ly, 5, 10).arg(lz, 3, 7));
 
 		double stage[3];
-		stage[0] = (lx - wi / 2)*um_px;
-		stage[1] = -(ly - he / 2)*um_py;
+		stage[0] = -(lx - wi / 2)*um_px;
+		stage[1] = (ly - he / 2)*um_py;
 		stage[2] = ipict * um_pz;
 		lab_stg_cl->setText(QString("click: %1, %2, %3").arg(viewx + stage[0]).arg(viewy + stage[1]).arg(viewz + stage[2]));
 
@@ -391,11 +394,11 @@ void ueno_viewer::labMouseMoved(QMouseEvent* e){
 	int cx = e->x();
 	int cy = e->y();
 	int cz = ipict;
-	lab_pix->setText(QString("current pos: %1, %2, %3").arg(cx, 5, 10).arg(cy, 5, 10).arg(cz, 5, 10));
+	lab_pix->setText(QString("current pos: %1, %2, %3").arg(cx, 5, 10).arg(cy, 5, 10).arg(cz, 3, 7));
 
 	double stage[3];
-	stage[0] = (cx - wi / 2)*um_px;
-	stage[1] = -(cy - he / 2)*um_py;
+	stage[0] = -(cx - wi / 2)*um_px;
+	stage[1] = (cy - he / 2)*um_py;
 	stage[2] = ipict * um_pz;
 	lab_stg->setText(QString("current pos: %1, %2, %3").arg(viewx + stage[0]).arg(viewy + stage[1]).arg(viewz + stage[2]));
 
@@ -404,7 +407,7 @@ void ueno_viewer::labMouseMoved(QMouseEvent* e){
 		int dy = cy - ly;
 		int dz = cz - lz;
 
-		lab_pix_dr->setText(QString("drag: %1, %2, %3").arg(dx, 5, 10).arg(dy, 5, 10).arg(dz, 5, 10));
+		lab_pix_dr->setText(QString("drag: %1, %2, %3").arg(dx, 5, 10).arg(dy, 5, 10).arg(dz, 3, 7));
 		lab_stg_dr->setText(QString("drag: %1, %2, %3 (%4)").arg(dx*um_px).arg(dy*um_py).arg(dz*um_pz).arg(dz*um_pz*Sh));
 
 	}
@@ -541,8 +544,8 @@ void ueno_viewer::showContextMenu(QMouseEvent* e)
 				QString str = txt_clicked->toPlainText();
 				str += QString("end pos: %1 %2 %3\n").arg(end_x).arg(end_y).arg(end_z);	
 				
-				double dx = (end_x - start_x)*um_px;
-				double dy = -(end_y - start_y)*um_py;
+				double dx = -(end_x - start_x)*um_px;
+				double dy = (end_y - start_y)*um_py;
 				double dz = (end_z - start_z)*um_pz;
 				double range = sqrt(dx*dx + dy*dy +dz*dz*Sh*Sh);
 				
@@ -556,7 +559,7 @@ void ueno_viewer::showContextMenu(QMouseEvent* e)
 				str += QString("Angle phi= %1\n").arg(phi);
 
 				double theta = acos(dz*Sh / range)* 180/ M_PI;
-				str += QString("Angle thita= %1\n").arg(theta);
+				str += QString("Angle theta= %1\n").arg(theta);
 
 				txt_clicked->setText(str);
 			}
