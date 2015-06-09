@@ -1,8 +1,11 @@
+#define _USE_MATH_DEFINES
 #ifndef UENO_VIEWER_H
 #define UENO_VIEWER_H
 
 #include <QtWidgets/QWidget>
 #include "ui_ueno_viewer.h"
+
+#include <math.h>
 
 #include "..\opencv.h"
 
@@ -16,6 +19,7 @@ class QLCDNumber;
 class QCheckBox;
 class QTextEdit;
 class QClickableLabel;
+class QSlider;
 
 
 class ueno_viewer : public QWidget
@@ -37,11 +41,13 @@ private slots:
 	bool imgDown();
 	bool loadImg();
 	bool changeLayer(QWheelEvent *);
+	void changeToNthLayer(int);
 	void displayMousePos(QMouseEvent *);
 	void labMouseClicked(QMouseEvent *);
 	void labMouseMoved(QMouseEvent *);
 	void updateSubDisplay(QMouseEvent *);
 	void showContextMenu(QMouseEvent *);
+	void writeTxtFile();
 
 private:
 	QSettings* appsettings;
@@ -63,6 +69,10 @@ private:
 	QLabel* lab_pix;
 	QLabel* lab_pix_cl;
 	QLabel* lab_pix_dr;
+	
+	QLabel* lab_stg;
+	QLabel* lab_stg_cl;
+	QLabel* lab_stg_dr;
 
 	QLineEdit* line_file;
 	QPushButton* but_file;
@@ -73,14 +83,21 @@ private:
 	QPushButton* but_up;
 	QPushButton* but_down;
 	QPushButton* but_make;
+	QPushButton* but_writxt;
 
 	QTextEdit* txt_clicked;
+	QSlider* sli_z;
 
 
 	int ipict;
-	int lx,ly;
+	int lx,ly,lz;
 	int wi;
 	int he;
+	int start_x, start_y, start_z;
+	int end_x, end_y, end_z;
+	double um_px, um_py, um_pz;
+	double viewx, viewy, viewz;
+	double Sh;
 
 	void Init();
 	void getTheDarkestZ(int x, int y, int z, int range);

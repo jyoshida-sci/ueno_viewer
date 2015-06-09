@@ -1,4 +1,5 @@
 #include "ueno_viewer.h"
+
 #include "qsettings.h"
 
 #include "qlineedit.h"
@@ -10,6 +11,7 @@
 #include "qcheckbox.h"
 #include "qtextedit.h"
 #include "qtextstream.h"
+#include "qslider.h"
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -68,6 +70,16 @@ ueno_viewer::ueno_viewer(QWidget *parent)
 	lay_click->addWidget(lab_pix_dr);
 	lay->addLayout(lay_click, 4, 0, 1, 2);
 
+	QHBoxLayout *lay_stage = new QHBoxLayout();
+	lab_stg = new QLabel();
+	lay_stage->addWidget(lab_stg);
+	lab_stg_cl = new QLabel();
+	lay_stage->addWidget(lab_stg_cl);
+	lab_stg_dr = new QLabel();
+	lay_stage->addWidget(lab_stg_dr);
+	lay->addLayout(lay_stage, 5, 0, 1, 2);
+
+
 
 	//file path
 	QHBoxLayout *lay_file = new QHBoxLayout();
@@ -80,15 +92,17 @@ ueno_viewer::ueno_viewer(QWidget *parent)
 	lay_file->addWidget(but_file);
 	lay_file->addWidget(lcd_img);
 	lay_file->addWidget(chk_filterd);
-	lay->addLayout(lay_file, 5, 0, 1, 2);
+	lay->addLayout(lay_file, 6, 0, 1, 2);
 
-
+	sli_z = new QSlider();
+	lay->addWidget(sli_z, 0, 2, 6, 1);
 
 	//texteditarea
 	txt_clicked = new QTextEdit(); 
-	txt_clicked->setFixedWidth(150);
-	lay->addWidget(txt_clicked, 0, 2, 6, 1);
-
+	txt_clicked->setFixedWidth(170);
+	lay->addWidget(txt_clicked, 0, 3, 5, 1);
+	but_writxt = new QPushButton(tr("&Write File"));
+	lay->addWidget(but_writxt, 5, 3, 1, 1);
 	//but_make = new QPushButton(tr("&Make pict"));
 	//lay->addWidget(but_make, 4, 2, 1, 1);
 
@@ -101,14 +115,18 @@ ueno_viewer::ueno_viewer(QWidget *parent)
 	connect(but_file, SIGNAL(clicked()), this, SLOT(loadImg()));
 	connect(but_up, SIGNAL(clicked()), this, SLOT(ImgUp()));
 	connect(but_down, SIGNAL(clicked()), this, SLOT(ImgDown()));
+
+	connect(but_writxt, SIGNAL(clicked()), this, SLOT(writeTxtFile()));
 	connect(this,SIGNAL(wheelEvent(QWheelEvent*)),this,SLOT(changeLayer(QWheelEvent*)));
 	connect(lab_img, SIGNAL(mousePressed(QMouseEvent*)),this,SLOT(displayMousePos(QMouseEvent*)));
 	connect(lab_img, SIGNAL(mousePressed(QMouseEvent*)),this,SLOT(labMouseClicked(QMouseEvent*)));
 	connect(lab_img, SIGNAL(mousePressed(QMouseEvent*)),this,SLOT(showContextMenu(QMouseEvent*)));
 	connect(lab_img, SIGNAL(mouseMoved(QMouseEvent*)),this,SLOT(labMouseMoved(QMouseEvent*)));
+	connect(sli_z, SIGNAL(valueChanged(int)), this, SLOT(changeToNthLayer(int)));
 
 	but_up->setDisabled(true);
 	but_down->setDisabled(true);
+	sli_z->setDisabled(true);
 
 }
 
@@ -164,6 +182,7 @@ bool ueno_viewer::changeLayer(QWheelEvent *event)
 		lcd_img->display(ipict);
 		if ( !updateImg(ipict) ) return false;
 	}
+	sli_z->setValue(ipict);
 	return true;
 }
 
@@ -176,6 +195,7 @@ bool ueno_viewer::imgUp()
 	if(ipict!=vomat.size()-1) but_down->setEnabled(true);
 	lcd_img->display(ipict);
 	if ( !updateImg(ipict) ) return false;
+	sli_z->setValue(ipict);
 	return true;
 }
 
@@ -187,16 +207,36 @@ bool ueno_viewer::imgDown()
 	if(ipict==vomat.size()-1) but_down->setDisabled(true);
 	lcd_img->display(ipict);
 	if ( !updateImg(ipict) ) return false;
+	sli_z->setValue(ipict);
 	return true;	
 }
 
+void ueno_viewer::changeToNthLayer(int i){
+	ipict = i;
+	if (ipict == 0){
+		but_up->setDisabled(true);
+	}
+	else{
+		but_up->setEnabled(true);
+	}
+
+	if (ipict == vomat.size() - 1){
+		but_down->setDisabled(true);
+	}
+	else{
+		but_down->setEnabled(true);
+	}
+	lcd_img->display(ipict);
+	updateImg(ipict);
+}
 
 
 bool ueno_viewer::loadImg(){
 
 	Init();
 	
-	QDir dir = appsettings->value("dir").toString();
+	QDir dir = appsettings->value("readdir").toString();
+	qDebug() << dir.absolutePath();
 
 	//dialog
 	QString fileName = QFileDialog::getOpenFileName(
@@ -208,7 +248,7 @@ bool ueno_viewer::loadImg(){
 
 	//dir path
 	dir = QFileInfo(fileName).absoluteDir();
-	appsettings->setValue("dir", dir.absolutePath());
+	appsettings->setValue("readdir", dir.absolutePath());
 
 	//file open
 	QFile file((const char *)fileName.toLatin1().data());
@@ -224,6 +264,13 @@ bool ueno_viewer::loadImg(){
 
 	wi = jsonobj["ImageType"].toObject()["Width"].toInt();
 	he = jsonobj["ImageType"].toObject()["Height"].toInt();
+	Sh = jsonobj["Sh"].toDouble();
+	um_px = jsonobj["Interval"].toArray().at(0).toDouble();
+	um_py = jsonobj["Interval"].toArray().at(1).toDouble();
+	um_pz = jsonobj["Interval"].toArray().at(2).toDouble();
+	viewx = jsonobj["InitialPos"].toArray().at(0).toDouble();
+	viewy = jsonobj["InitialPos"].toArray().at(1).toDouble();
+	viewz = jsonobj["InitialPos"].toArray().at(2).toDouble();
 
 	//read img files
 	for(int p=0; p<array_images.count(); p++){
@@ -284,6 +331,8 @@ bool ueno_viewer::loadImg(){
 	ipict=0;
 	if ( !updateImg(ipict) ) return false;
 	but_down->setEnabled(true);
+	sli_z->setEnabled(true);
+	sli_z->setMaximum(vfmat.size()-1);
 
 	line_file->setText(QString("%1").arg(fileName));
 
@@ -312,8 +361,8 @@ void ueno_viewer::displayMousePos(QMouseEvent* e){
 	int py = e->y();
 
 	QString str = txt_clicked->toPlainText();
-	str += QString("%1  %2  %3\n").arg(px).arg(py).arg(lcd_img->value());
-	txt_clicked->setText(str);
+	str += QString("%1  %2  %3\n").arg(px).arg(py).arg(ipict);
+	txt_clicked->setText(str);	
 }
 
 
@@ -323,7 +372,15 @@ void ueno_viewer::labMouseClicked(QMouseEvent* e){
 	if(e->buttons() & Qt::LeftButton){
 		lx = e->x();
 		ly = e->y();
-		lab_pix_cl->setText(QString("click: %1, %2").arg(lx).arg(ly));
+		lz = ipict;
+		lab_pix_cl->setText(QString("click: %1, %2, %3").arg(lx).arg(ly).arg(lz));
+
+		double stage[3];
+		stage[0] = (lx - wi / 2)*um_px;
+		stage[1] = -(ly - he / 2)*um_py;
+		stage[2] = ipict * um_pz;
+		lab_stg_cl->setText(QString("click: %1, %2, %3").arg(viewx + stage[0]).arg(viewy + stage[1]).arg(viewz + stage[2]));
+
 	}
 
 }
@@ -333,10 +390,23 @@ void ueno_viewer::labMouseMoved(QMouseEvent* e){
 
 	int cx = e->x();
 	int cy = e->y();
-	lab_pix->setText(QString("current pos: %1, %2").arg(cx).arg(cy));
+	int cz = ipict;
+	lab_pix->setText(QString("current pos: %1, %2, %3").arg(cx).arg(cy).arg(cz));
+
+	double stage[3];
+	stage[0] = (cx - wi / 2)*um_px;
+	stage[1] = -(cy - he / 2)*um_py;
+	stage[2] = ipict * um_pz;
+	lab_stg->setText(QString("current pos: %1, %2, %3").arg(viewx + stage[0]).arg(viewy + stage[1]).arg(viewz + stage[2]));
 
 	if(e->buttons() & Qt::LeftButton){
-		lab_pix_dr->setText(QString("drag: %1, %2").arg(cx-lx).arg(cy-ly));
+3		int dx = cx - lx;
+		int dy = cy - ly;
+		int dz = cz - lz;
+
+		lab_pix_dr->setText(QString("drag: %1, %2, %3").arg(dx).arg(dy).arg(dz));
+		lab_stg_dr->setText(QString("drag: %1, %2, %3 (%4)").arg(dx*um_px).arg(dy*um_py).arg(dz*um_pz).arg(dz*um_pz*Sh));
+
 	}
 
 	updateSubDisplay(e);
@@ -436,6 +506,8 @@ void ueno_viewer::showContextMenu(QMouseEvent* e)
 		QMenu myMenu;
 		myMenu.addAction("Get the darkest in 25layers");
 		myMenu.addAction("Get the darkest in 50layers");
+		myMenu.addAction("Set the start point");
+		myMenu.addAction("Set the end point");
 
 		QAction* selectedItem = myMenu.exec(globalPos);
 		if (selectedItem){
@@ -449,11 +521,75 @@ void ueno_viewer::showContextMenu(QMouseEvent* e)
 				str += QString("50000000\n");
 				txt_clicked->setText(str);
 				getTheDarkestZ(e->x(), e->y(), ipict, 50);
+			}else if (selectedItem->text() == "Set the start point"){
+
+				start_x = e->x();
+				start_y = e->y();
+				start_z = ipict;
+
+				QString str = txt_clicked->toPlainText();
+				str += QString("start pos: %1 %2 %3\n").arg(start_x).arg(start_y).arg(start_z);
+				txt_clicked->setText(str);
+
+
 			}
+			else if (selectedItem->text() == "Set the end point"){
+
+				end_x = e->x();
+				end_y = e->y();
+				end_z = ipict;
+				QString str = txt_clicked->toPlainText();
+				str += QString("end pos: %1 %2 %3\n").arg(end_x).arg(end_y).arg(end_z);	
+				
+				double dx = (end_x - start_x)*um_px;
+				double dy = -(end_y - start_y)*um_py;
+				double dz = (end_z - start_z)*um_pz;
+				double range = sqrt(dx*dx + dy*dy +dz*dz*Sh*Sh);
+				
+
+				str += QString("Range= %1\n").arg(range);
+
+				
+				double phi = atan2(dy, dx) * 180 / M_PI;
+				if (dy < 0) phi += 360.0;
+
+				str += QString("Angle phi= %1\n").arg(phi);
+
+				double theta = acos(dz*Sh / range)* 180/ M_PI;
+				str += QString("Angle thita= %1\n").arg(theta);
+
+				txt_clicked->setText(str);
+			}
+			
 		}//if (selectedItem)
 	}
 }
 
+void ueno_viewer::writeTxtFile(){
+
+	QDir dir = appsettings->value("writedir").toString();
+	qDebug() << dir.absolutePath();
+	//dialog
+	QString selFilter = "All files (*.txt)";
+	QString fileName = QFileDialog::getSaveFileName(
+		this,
+		"Save file",
+		dir.absolutePath(),
+		"Text files (*.txt);;All files (*.*)",
+		&selFilter);
+	
+	dir = QFileInfo(fileName).absoluteDir();
+	appsettings->setValue("writedir", dir.absolutePath());
+
+	// write text file 
+	QFile file(fileName);
+		if (file.open(QIODevice::WriteOnly)) {
+			QTextStream stream(&file);
+			QString str = txt_clicked->toPlainText();
+			stream << str;
+		}
+
+}
 
 void ueno_viewer::getTheDarkestZ(int x, int y, int z,  int range)
 {
