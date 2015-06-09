@@ -373,7 +373,7 @@ void ueno_viewer::labMouseClicked(QMouseEvent* e){
 		lx = e->x();
 		ly = e->y();
 		lz = ipict;
-		lab_pix_cl->setText(QString("click: %1, %2, %3").arg(lx).arg(ly).arg(lz));
+		lab_pix_cl->setText(QString("click: %1, %2, %3").arg(lx, 5, 10).arg(ly, 5, 10).arg(lz, 5, 10));
 
 		double stage[3];
 		stage[0] = (lx - wi / 2)*um_px;
@@ -391,7 +391,7 @@ void ueno_viewer::labMouseMoved(QMouseEvent* e){
 	int cx = e->x();
 	int cy = e->y();
 	int cz = ipict;
-	lab_pix->setText(QString("current pos: %1, %2, %3").arg(cx).arg(cy).arg(cz));
+	lab_pix->setText(QString("current pos: %1, %2, %3").arg(cx, 5, 10).arg(cy, 5, 10).arg(cz, 5, 10));
 
 	double stage[3];
 	stage[0] = (cx - wi / 2)*um_px;
@@ -400,11 +400,11 @@ void ueno_viewer::labMouseMoved(QMouseEvent* e){
 	lab_stg->setText(QString("current pos: %1, %2, %3").arg(viewx + stage[0]).arg(viewy + stage[1]).arg(viewz + stage[2]));
 
 	if(e->buttons() & Qt::LeftButton){
-3		int dx = cx - lx;
+		int dx = cx - lx;
 		int dy = cy - ly;
 		int dz = cz - lz;
 
-		lab_pix_dr->setText(QString("drag: %1, %2, %3").arg(dx).arg(dy).arg(dz));
+		lab_pix_dr->setText(QString("drag: %1, %2, %3").arg(dx, 5, 10).arg(dy, 5, 10).arg(dz, 5, 10));
 		lab_stg_dr->setText(QString("drag: %1, %2, %3 (%4)").arg(dx*um_px).arg(dy*um_py).arg(dz*um_pz).arg(dz*um_pz*Sh));
 
 	}
