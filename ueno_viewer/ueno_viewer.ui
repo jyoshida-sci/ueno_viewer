@@ -1,0 +1,25 @@
+<UI version="4.0" >
+ <class>ueno_viewerClass</class>
+ <widget class="QWidget" name="ueno_viewerClass" >
+  <property name="objectName" >
+   <string notr="true">ueno_viewerClass</string>
+  </property>
+  <property name="geometry" >
+   <rect>
+	<x>0</x>
+	<y>0</y>
+	<width>600</width>
+	<height>400</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>ueno_viewer</string>
+  </property>
+ </widget>
+ <layoutDefault spacing="6" margin="11" />
+ <pixmapfunction></pixmapfunction>
+ <resources>
+   <include location="ueno_viewer.qrc"/>
+ </resources>
+ <connections/>
+</UI>
