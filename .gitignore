@@ -30,3 +30,4 @@ $tf*/
 *.opensdf
 *.sdf
 *.filters
+*/GeneratedFiles/*
