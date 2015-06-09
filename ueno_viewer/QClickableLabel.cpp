@@ -1,4 +1,4 @@
-#include "MyClickableLabel.h"
+#include "QClickableLabel.h"
 #include <QMouseEvent>
 
 QClickableLabel::QClickableLabel(QWidget *parent)
