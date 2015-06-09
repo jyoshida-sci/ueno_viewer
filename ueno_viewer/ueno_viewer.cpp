@@ -168,7 +168,7 @@ bool ueno_viewer::changeLayer(QWheelEvent *event)
 }
 
 
-bool ueno_viewer::ImgUp()
+bool ueno_viewer::imgUp()
 {
 	ipict--;
 	if(ipict==-1)ipict=0;
@@ -179,7 +179,7 @@ bool ueno_viewer::ImgUp()
 	return true;
 }
 
-bool ueno_viewer::ImgDown()
+bool ueno_viewer::imgDown()
 {
 	ipict++;
 	if(ipict==vomat.size())ipict=vomat.size()-1;

@@ -33,8 +33,8 @@ signals:
 
 private slots:
 	bool updateImg(int i);
-	bool ImgUp();
-	bool ImgDown();
+	bool imgUp();
+	bool imgDown();
 	bool loadImg();
 	bool changeLayer(QWheelEvent *);
 	void displayMousePos(QMouseEvent *);
