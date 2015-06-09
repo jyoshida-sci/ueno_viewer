@@ -1,3 +1,6 @@
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 #include "ueno_viewer.h"
 
 #include "qsettings.h"
@@ -170,6 +173,8 @@ bool ueno_viewer::updateImg(int i){
 
 bool ueno_viewer::changeLayer(QWheelEvent *event)
 {
+	if (vomat.size() == 0) return false;
+
 	if(event->delta()<0){
 		ipict++;
 		if(ipict==vomat.size())ipict=vomat.size()-1;

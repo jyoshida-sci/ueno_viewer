@@ -1,11 +1,9 @@
-#define _USE_MATH_DEFINES
+
 #ifndef UENO_VIEWER_H
 #define UENO_VIEWER_H
 
 #include <QtWidgets/QWidget>
 #include "ui_ueno_viewer.h"
-
-#include <math.h>
 
 #include "..\opencv.h"
 
@@ -60,7 +58,6 @@ private:
 	QPixmap pix1;
 	QPixmap pix2;
 	QPixmap pix3;
-	QPixmap pix_f;
 
 	QClickableLabel* lab_img;
 	QLabel* lab_img_o;
