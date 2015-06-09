@@ -21,7 +21,7 @@
 #include "qmenu.h"
 #include <QMouseEvent>
 
-#include "MyClickableLabel.h"
+#include "QClickableLabel.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -72,14 +72,11 @@ ueno_viewer::ueno_viewer(QWidget *parent)
 	line_file = new QLineEdit(QString("no file yet"));
 	but_file = new QPushButton(tr("&Read file"));
 	lcd_img = new QLCDNumber(); 
-	//chk_enlarge = new QCheckBox("x1.2");
-	//chk_enlarge->setCheckState(Qt::Checked);
 	chk_filterd = new QCheckBox("filterd");
 	//chk_filterd->setCheckState(Qt::Checked);
 	lay_file->addWidget(line_file);
 	lay_file->addWidget(but_file);
 	lay_file->addWidget(lcd_img);
-	//lay_file->addWidget(chk_enlarge);
 	lay_file->addWidget(chk_filterd);
 	lay->addLayout(lay_file, 5, 0, 1, 2);
 
@@ -202,7 +199,7 @@ bool ueno_viewer::loadImg(){
 		this,
 		tr("Open files"),
 		QDir::homePath(),
-		tr("DAT Files (*.json);;All Files (*)"));
+		tr("JSON Files (*.json);;All Files (*)"));
 	if(fileName.isEmpty())return false;
 
 	//dir path
@@ -290,7 +287,6 @@ bool ueno_viewer::loadImg(){
 	QImage image_o(	9*24, 
 					9*24, 
 					QImage::Format_RGB888);
-					//QImage::Format_Indexed8);
 	image_o = image_o.convertToFormat(QImage::Format_RGB32);
 	lab_img_o->setPixmap(QPixmap::fromImage(image_o));
 
@@ -299,7 +295,6 @@ bool ueno_viewer::loadImg(){
 	QImage image_f(	9*24, 
 					9*24, 
 					QImage::Format_RGB888);
-					//QImage::Format_Indexed8);
 	image_f = image_f.convertToFormat(QImage::Format_RGB32);
 	lab_img_f->setPixmap(QPixmap::fromImage(image_f));
 
@@ -382,7 +377,6 @@ void ueno_viewer::updateSubDisplay(QMouseEvent* e){
 						mat_o.cols, 
 						mat_o.rows, 
 						QImage::Format_RGB888);
-						//QImage::Format_Indexed8);
 		image_o = image_o.convertToFormat(QImage::Format_RGB32);
 		lab_img_o->setPixmap(QPixmap::fromImage(image_o));
 
@@ -419,7 +413,6 @@ void ueno_viewer::updateSubDisplay(QMouseEvent* e){
 						mat_f.cols, 
 						mat_f.rows, 
 						QImage::Format_RGB888);
-						//QImage::Format_Indexed8);
 		image_f = image_f.convertToFormat(QImage::Format_RGB32);
 		lab_img_f->setPixmap(QPixmap::fromImage(image_f));
 
