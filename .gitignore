@@ -31,3 +31,4 @@ $tf*/
 *.sdf
 *.filters
 */GeneratedFiles/*
+*.ini

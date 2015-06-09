@@ -7,7 +7,7 @@
 #include "..\opencv.h"
 
 
-
+class QSettings;
 class QLabel;
 class QPixmap;
 class QLineEdit;
@@ -44,6 +44,8 @@ private slots:
 	void showContextMenu(QMouseEvent *);
 
 private:
+	QSettings* appsettings;
+
 	std::vector<cv::Mat> vomat;//original
 	std::vector<cv::Mat> vfmat;//filterd
 	//std::vector<cluster2d> vc2;

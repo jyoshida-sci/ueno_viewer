@@ -1,4 +1,5 @@
 #include "ueno_viewer.h"
+#include "qsettings.h"
 
 #include "qlineedit.h"
 #include "qpushbutton.h"
@@ -35,6 +36,7 @@
 ueno_viewer::ueno_viewer(QWidget *parent)
 	: QWidget(parent)
 {
+	appsettings = new QSettings("ueno_viewer.ini", QSettings::IniFormat);
 
 	QGridLayout* lay = new QGridLayout();
 
@@ -193,17 +195,20 @@ bool ueno_viewer::ImgDown()
 bool ueno_viewer::loadImg(){
 
 	Init();
+	
+	QDir dir = appsettings->value("dir").toString();
 
 	//dialog
 	QString fileName = QFileDialog::getOpenFileName(
 		this,
 		tr("Open files"),
-		QDir::homePath(),
+		dir.absolutePath(),
 		tr("JSON Files (*.json);;All Files (*)"));
 	if(fileName.isEmpty())return false;
 
 	//dir path
-	QDir dir = QFileInfo(fileName).absoluteDir();
+	dir = QFileInfo(fileName).absoluteDir();
+	appsettings->setValue("dir", dir.absolutePath());
 
 	//file open
 	QFile file((const char *)fileName.toLatin1().data());
