@@ -381,13 +381,13 @@ void ueno_viewer::labMouseClicked(QMouseEvent* e){
 		lx = e->x();
 		ly = e->y();
 		lz = ipict;
-		lab_pix_cl->setText(QString("click: %1, %2, %3").arg(lx, 5, 10).arg(ly, 5, 10).arg(lz, 3, 7));
+		lab_pix_cl->setText(QString("click: %1, %2, %3").arg(lx, 4, 10).arg(ly, 4, 10).arg(lz, 4, 10));
 
 		double stage[3];
 		stage[0] = -(lx - wi / 2)*um_px;
 		stage[1] = (ly - he / 2)*um_py;
 		stage[2] = ipict * um_pz;
-		lab_stg_cl->setText(QString("click: %1, %2, %3").arg(viewx + stage[0]).arg(viewy + stage[1]).arg(viewz + stage[2]));
+		lab_stg_cl->setText(QString("%1, %2, %3").arg(viewx + stage[0], 7, 'f', 1).arg(viewy + stage[1], 7, 'f', 1).arg(viewz + stage[2], 7, 'f', 1));
 
 	}
 
@@ -399,21 +399,24 @@ void ueno_viewer::labMouseMoved(QMouseEvent* e){
 	int cx = e->x();
 	int cy = e->y();
 	int cz = ipict;
-	lab_pix->setText(QString("current pos: %1, %2, %3").arg(cx, 5, 10).arg(cy, 5, 10).arg(cz, 3, 7));
+	qDebug() << ipict;
+	qDebug() << QString("current pos: %1, %2, %3").arg(cx, 4, 10).arg(cy, 4, 10).arg(cz, 4, 10);
+
+	lab_pix->setText(QString("current pos: %1, %2, %3").arg(cx, 4, 10).arg(cy, 4, 10).arg(cz, 4, 10));
 
 	double stage[3];
 	stage[0] = -(cx - wi / 2)*um_px;
 	stage[1] = (cy - he / 2)*um_py;
 	stage[2] = ipict * um_pz;
-	lab_stg->setText(QString("current pos: %1, %2, %3").arg(viewx + stage[0]).arg(viewy + stage[1]).arg(viewz + stage[2]));
+	lab_stg->setText(QString("%1, %2, %3").arg(viewx + stage[0], 7, 'f', 1).arg(viewy + stage[1], 7, 'f', 1).arg(viewz + stage[2], 7, 'f', 1));
 
 	if(e->buttons() & Qt::LeftButton){
 		int dx = cx - lx;
 		int dy = cy - ly;
 		int dz = cz - lz;
 
-		lab_pix_dr->setText(QString("drag: %1, %2, %3").arg(dx, 5, 10).arg(dy, 5, 10).arg(dz, 3, 7));
-		lab_stg_dr->setText(QString("drag: %1, %2, %3 (%4)").arg(dx*um_px).arg(dy*um_py).arg(dz*um_pz).arg(dz*um_pz*Sh));
+		lab_pix_dr->setText(QString("drag: %1, %2, %3").arg(dx, 4, 10).arg(dy, 4, 10).arg(dz, 4, 10));
+		lab_stg_dr->setText(QString("%1, %2, %3 (%4)").arg(dx*um_px, 7, 'f', 1).arg(dy*um_py).arg(dz*um_pz, 7, 'f', 1).arg(dz*um_pz*Sh, 7, 'f', 1));
 
 	}
 
