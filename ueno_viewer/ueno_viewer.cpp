@@ -119,8 +119,8 @@ ueno_viewer::ueno_viewer(QWidget *parent)
 
 	//connect signal-slot
 	connect(but_file, SIGNAL(clicked()), this, SLOT(loadImg()));
-	connect(but_up, SIGNAL(clicked()), this, SLOT(ImgUp()));
-	connect(but_down, SIGNAL(clicked()), this, SLOT(ImgDown()));
+	connect(but_up, SIGNAL(clicked()), this, SLOT(imgUp()));
+	connect(but_down, SIGNAL(clicked()), this, SLOT(imgDown()));
 
 	connect(but_writxt, SIGNAL(clicked()), this, SLOT(writeTxtFile()));
 	connect(this,SIGNAL(wheelEvent(QWheelEvent*)),this,SLOT(changeLayer(QWheelEvent*)));
