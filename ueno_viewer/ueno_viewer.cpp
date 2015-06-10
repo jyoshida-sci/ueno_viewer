@@ -527,13 +527,14 @@ void ueno_viewer::showContextMenu(QMouseEvent* e)
 				str += QString("25252525\n");
 				txt_clicked->setText(str);
 				getTheDarkestZ(e->x(), e->y(), ipict, 25);
+
 			}else if(selectedItem->text() == "Get the darkest in 50layers_UnderConstruction"){
 				QString str = txt_clicked->toPlainText();
 				str += QString("50000000\n");
 				txt_clicked->setText(str);
 				getTheDarkestZ(e->x(), e->y(), ipict, 50);
-			}else if (selectedItem->text() == "Set the start point"){
 
+			}else if (selectedItem->text() == "Set the start point"){
 				start_x = e->x();
 				start_y = e->y();
 				start_z = ipict;
@@ -543,9 +544,7 @@ void ueno_viewer::showContextMenu(QMouseEvent* e)
 				txt_clicked->setText(str);
 
 
-			}
-			else if (selectedItem->text() == "Set the end point"){
-
+			}else if(selectedItem->text() == "Set the end point"){
 				end_x = e->x();
 				end_y = e->y();
 				end_z = ipict;
@@ -555,18 +554,22 @@ void ueno_viewer::showContextMenu(QMouseEvent* e)
 				double dx = -(end_x - start_x)*um_px;
 				double dy = (end_y - start_y)*um_py;
 				double dz = (end_z - start_z)*um_pz;
-				double range = sqrt(dx*dx + dy*dy +dz*dz*Sh*Sh);
 				
-
+				double range = sqrt(dx*dx + dy*dy +dz*dz*Sh*Sh);
 				str += QString("Range= %1\n").arg(range);
 
-				
 				double phi = atan2(dy, dx) * 180 / M_PI;
 				if (dy < 0) phi += 360.0;
-
 				str += QString("Angle phi= %1\n").arg(phi);
 
-				double theta = acos(dz*Sh / range)* 180/ M_PI;
+				double cos_theta = dz*Sh / range;
+				if (cos_theta>1.0){
+					cos_theta = 1.0;
+				}
+				if (cos_theta<-1.0){
+					cos_theta = -1.0;
+				}
+				double theta = acos(cos_theta) * 180 / M_PI;
 				str += QString("Angle theta= %1\n").arg(theta);
 
 				txt_clicked->setText(str);
