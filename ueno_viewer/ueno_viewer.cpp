@@ -107,7 +107,7 @@ ueno_viewer::ueno_viewer(QWidget *parent)
 	txt_clicked = new QTextEdit(); 
 	txt_clicked->setFixedWidth(170);
 	lay->addWidget(txt_clicked, 0, 3, 5, 1);
-	but_writxt = new QPushButton(tr("&Write File"));
+	but_writxt = new QPushButton(tr("&Save File"));
 	lay->addWidget(but_writxt, 5, 3, 1, 1);
 	//but_make = new QPushButton(tr("&Make pict"));
 	//lay->addWidget(but_make, 4, 2, 1, 1);
@@ -124,7 +124,6 @@ ueno_viewer::ueno_viewer(QWidget *parent)
 
 	connect(but_writxt, SIGNAL(clicked()), this, SLOT(writeTxtFile()));
 	connect(this,SIGNAL(wheelEvent(QWheelEvent*)),this,SLOT(changeLayer(QWheelEvent*)));
-	connect(lab_img, SIGNAL(mousePressed(QMouseEvent*)),this,SLOT(displayMousePos(QMouseEvent*)));
 	connect(lab_img, SIGNAL(mousePressed(QMouseEvent*)),this,SLOT(labMouseClicked(QMouseEvent*)));
 	connect(lab_img, SIGNAL(mousePressed(QMouseEvent*)),this,SLOT(showContextMenu(QMouseEvent*)));
 	connect(lab_img, SIGNAL(mouseMoved(QMouseEvent*)),this,SLOT(labMouseMoved(QMouseEvent*)));
@@ -364,17 +363,6 @@ bool ueno_viewer::loadImg(){
 }
 
 
-void ueno_viewer::displayMousePos(QMouseEvent* e){
-	int px = e->x();
-	int py = e->y();
-
-	QString str = txt_clicked->toPlainText();
-	str += QString("%1  %2  %3\n").arg(px).arg(py).arg(ipict);
-	txt_clicked->setText(str);	
-}
-
-
-
 void ueno_viewer::labMouseClicked(QMouseEvent* e){
 
 	if(e->buttons() & Qt::LeftButton){
@@ -382,6 +370,10 @@ void ueno_viewer::labMouseClicked(QMouseEvent* e){
 		ly = e->y();
 		lz = ipict;
 		lab_pix_cl->setText(QString("click: %1, %2, %3").arg(lx, 4, 10).arg(ly, 4, 10).arg(lz, 4, 10));
+
+		QString str = txt_clicked->toPlainText();
+		str += QString("%1  %2  %3\n").arg(lx).arg(ly).arg(lz);
+		txt_clicked->setText(str);
 
 		double stage[3];
 		stage[0] = -(lx - wi / 2)*um_px;

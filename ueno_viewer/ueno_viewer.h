@@ -40,7 +40,6 @@ private slots:
 	bool loadImg();
 	bool changeLayer(QWheelEvent *);
 	void changeToNthLayer(int);
-	void displayMousePos(QMouseEvent *);
 	void labMouseClicked(QMouseEvent *);
 	void labMouseMoved(QMouseEvent *);
 	void updateSubDisplay(QMouseEvent *);
