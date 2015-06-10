@@ -5,7 +5,7 @@
 #include <QtWidgets/QWidget>
 #include "ui_ueno_viewer.h"
 
-#include "..\opencv.h"
+#include "..\opencv2411.h"
 
 
 class QSettings;

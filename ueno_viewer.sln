@@ -7,7 +7,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ueno_viewer", "ueno_viewer\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5BC29B4E-F88C-49FB-B98D-E7FD258777E1}"
 	ProjectSection(SolutionItems) = preProject
-		opencv.h = opencv.h
+		opencv2411.h = opencv2411.h
 		opencv300.h = opencv300.h
 	EndProjectSection
 EndProject
