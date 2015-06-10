@@ -5,7 +5,7 @@
 #include <QtWidgets/QWidget>
 #include "ui_ueno_viewer.h"
 
-#include "..\opencv300.h"
+#include "..\opencv.h"
 
 
 class QSettings;
@@ -43,7 +43,6 @@ private slots:
 	void labMouseClicked(QMouseEvent *);
 	void labMouseMoved(QMouseEvent *);
 	void updateSubDisplay(QMouseEvent *);
-	void showContextMenu(QMouseEvent *);
 	void writeTxtFile();
 
 private:

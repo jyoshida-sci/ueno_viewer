@@ -125,7 +125,6 @@ ueno_viewer::ueno_viewer(QWidget *parent)
 	connect(but_writxt, SIGNAL(clicked()), this, SLOT(writeTxtFile()));
 	connect(this,SIGNAL(wheelEvent(QWheelEvent*)),this,SLOT(changeLayer(QWheelEvent*)));
 	connect(lab_img, SIGNAL(mousePressed(QMouseEvent*)),this,SLOT(labMouseClicked(QMouseEvent*)));
-	connect(lab_img, SIGNAL(mousePressed(QMouseEvent*)),this,SLOT(showContextMenu(QMouseEvent*)));
 	connect(lab_img, SIGNAL(mouseMoved(QMouseEvent*)),this,SLOT(labMouseMoved(QMouseEvent*)));
 	connect(sli_z, SIGNAL(valueChanged(int)), this, SLOT(changeToNthLayer(int)));
 
@@ -364,23 +363,94 @@ bool ueno_viewer::loadImg(){
 
 
 void ueno_viewer::labMouseClicked(QMouseEvent* e){
+	
+	lx = e->x();
+	ly = e->y();
+	lz = ipict;
+	lab_pix_cl->setText(QString("click: %1, %2, %3").arg(lx, 4, 10).arg(ly, 4, 10).arg(lz, 4, 10));
+	
+	double stage[3];
+	stage[0] = -(lx - wi / 2)*um_px;
+	stage[1] = (ly - he / 2)*um_py;
+	stage[2] = ipict * um_pz;
+	lab_stg_cl->setText(QString("%1, %2, %3").arg(viewx + stage[0], 7, 'f', 1).arg(viewy + stage[1], 7, 'f', 1).arg(viewz + stage[2], 7, 'f', 1));
 
 	if(e->buttons() & Qt::LeftButton){
-		lx = e->x();
-		ly = e->y();
-		lz = ipict;
-		lab_pix_cl->setText(QString("click: %1, %2, %3").arg(lx, 4, 10).arg(ly, 4, 10).arg(lz, 4, 10));
-
 		QString str = txt_clicked->toPlainText();
 		str += QString("%1  %2  %3\n").arg(lx).arg(ly).arg(lz);
 		txt_clicked->setText(str);
+	}
+	else if (e->buttons() & Qt::RightButton)
+	{
+		//Right-click context menus with Qt
+		//http://www.setnode.com/blog/right-click-context-menus-with-qt/
+		QPoint globalPos = this->mapToGlobal(e->pos());
 
-		double stage[3];
-		stage[0] = -(lx - wi / 2)*um_px;
-		stage[1] = (ly - he / 2)*um_py;
-		stage[2] = ipict * um_pz;
-		lab_stg_cl->setText(QString("%1, %2, %3").arg(viewx + stage[0], 7, 'f', 1).arg(viewy + stage[1], 7, 'f', 1).arg(viewz + stage[2], 7, 'f', 1));
+		QMenu myMenu;
+		myMenu.addAction("Get the darkest in 25layers");
+		myMenu.addAction("Get the darkest in 50layers");
+		myMenu.addAction("Set the start point");
+		myMenu.addAction("Set the end point");
 
+		QAction* selectedItem = myMenu.exec(globalPos);
+		if (selectedItem){
+			if (selectedItem->text() == "Get the darkest in 25layers_UnderConstruction"){
+				QString str = txt_clicked->toPlainText();
+				str += QString("25252525\n");
+				txt_clicked->setText(str);
+				getTheDarkestZ(e->x(), e->y(), ipict, 25);
+
+			}
+			else if (selectedItem->text() == "Get the darkest in 50layers_UnderConstruction"){
+				QString str = txt_clicked->toPlainText();
+				str += QString("50000000\n");
+				txt_clicked->setText(str);
+				getTheDarkestZ(e->x(), e->y(), ipict, 50);
+
+			}
+			else if (selectedItem->text() == "Set the start point"){
+				start_x = e->x();
+				start_y = e->y();
+				start_z = ipict;
+
+				QString str = txt_clicked->toPlainText();
+				str += QString("start pos: %1 %2 %3\n").arg(start_x).arg(start_y).arg(start_z);
+				txt_clicked->setText(str);
+
+
+			}
+			else if (selectedItem->text() == "Set the end point"){
+				end_x = e->x();
+				end_y = e->y();
+				end_z = ipict;
+				QString str = txt_clicked->toPlainText();
+				str += QString("end pos: %1 %2 %3\n").arg(end_x).arg(end_y).arg(end_z);
+
+				double dx = -(end_x - start_x)*um_px;
+				double dy = (end_y - start_y)*um_py;
+				double dz = (end_z - start_z)*um_pz;
+
+				double range = sqrt(dx*dx + dy*dy + dz*dz*Sh*Sh);
+				str += QString("Range= %1\n").arg(range);
+
+				double phi = atan2(dy, dx) * 180 / M_PI;
+				if (dy < 0) phi += 360.0;
+				str += QString("Angle phi= %1\n").arg(phi);
+
+				double cos_theta = dz*Sh / range;
+				if (cos_theta>1.0){
+					cos_theta = 1.0;
+				}
+				if (cos_theta<-1.0){
+					cos_theta = -1.0;
+				}
+				double theta = acos(cos_theta) * 180 / M_PI;
+				str += QString("Angle theta= %1\n").arg(theta);
+
+				txt_clicked->setText(str);
+			}
+
+		}//if (selectedItem)
 	}
 
 }
@@ -498,78 +568,7 @@ void ueno_viewer::updateSubDisplay(QMouseEvent* e){
 	}
 }
 
-void ueno_viewer::showContextMenu(QMouseEvent* e)
-{
-	//Right-click context menus with Qt
-	//http://www.setnode.com/blog/right-click-context-menus-with-qt/
 
-	if(e->buttons() & Qt::RightButton){
-		QPoint globalPos = this->mapToGlobal(e->pos());
-
-		QMenu myMenu;
-		myMenu.addAction("Get the darkest in 25layers");
-		myMenu.addAction("Get the darkest in 50layers");
-		myMenu.addAction("Set the start point");
-		myMenu.addAction("Set the end point");
-
-		QAction* selectedItem = myMenu.exec(globalPos);
-		if (selectedItem){
-			if (selectedItem->text() == "Get the darkest in 25layers_UnderConstruction"){
-				QString str = txt_clicked->toPlainText();
-				str += QString("25252525\n");
-				txt_clicked->setText(str);
-				getTheDarkestZ(e->x(), e->y(), ipict, 25);
-
-			}else if(selectedItem->text() == "Get the darkest in 50layers_UnderConstruction"){
-				QString str = txt_clicked->toPlainText();
-				str += QString("50000000\n");
-				txt_clicked->setText(str);
-				getTheDarkestZ(e->x(), e->y(), ipict, 50);
-
-			}else if (selectedItem->text() == "Set the start point"){
-				start_x = e->x();
-				start_y = e->y();
-				start_z = ipict;
-
-				QString str = txt_clicked->toPlainText();
-				str += QString("start pos: %1 %2 %3\n").arg(start_x).arg(start_y).arg(start_z);
-				txt_clicked->setText(str);
-
-
-			}else if(selectedItem->text() == "Set the end point"){
-				end_x = e->x();
-				end_y = e->y();
-				end_z = ipict;
-				QString str = txt_clicked->toPlainText();
-				str += QString("end pos: %1 %2 %3\n").arg(end_x).arg(end_y).arg(end_z);	
-				
-				double dx = -(end_x - start_x)*um_px;
-				double dy = (end_y - start_y)*um_py;
-				double dz = (end_z - start_z)*um_pz;
-				
-				double range = sqrt(dx*dx + dy*dy +dz*dz*Sh*Sh);
-				str += QString("Range= %1\n").arg(range);
-
-				double phi = atan2(dy, dx) * 180 / M_PI;
-				if (dy < 0) phi += 360.0;
-				str += QString("Angle phi= %1\n").arg(phi);
-
-				double cos_theta = dz*Sh / range;
-				if (cos_theta>1.0){
-					cos_theta = 1.0;
-				}
-				if (cos_theta<-1.0){
-					cos_theta = -1.0;
-				}
-				double theta = acos(cos_theta) * 180 / M_PI;
-				str += QString("Angle theta= %1\n").arg(theta);
-
-				txt_clicked->setText(str);
-			}
-			
-		}//if (selectedItem)
-	}
-}
 
 void ueno_viewer::writeTxtFile(){
 
