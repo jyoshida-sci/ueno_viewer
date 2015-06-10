@@ -5,7 +5,7 @@
 #include <QtWidgets/QWidget>
 #include "ui_ueno_viewer.h"
 
-#include "..\opencv.h"
+#include "..\opencv300.h"
 
 
 class QSettings;
@@ -40,7 +40,6 @@ private slots:
 	bool loadImg();
 	bool changeLayer(QWheelEvent *);
 	void changeToNthLayer(int);
-	void displayMousePos(QMouseEvent *);
 	void labMouseClicked(QMouseEvent *);
 	void labMouseMoved(QMouseEvent *);
 	void updateSubDisplay(QMouseEvent *);
