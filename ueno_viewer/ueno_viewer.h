@@ -48,6 +48,8 @@ private slots:
 private:
 	QSettings* appsettings;
 
+	std::vector<QString> vfilename;
+
 	std::vector<cv::Mat> vomat;//original
 	std::vector<cv::Mat> vfmat;//filterd
 	//std::vector<cluster2d> vc2;

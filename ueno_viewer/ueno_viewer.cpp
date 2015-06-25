@@ -125,7 +125,7 @@ ueno_viewer::ueno_viewer(QWidget *parent)
 	connect(but_writxt, SIGNAL(clicked()), this, SLOT(writeTxtFile()));
 	connect(this,SIGNAL(wheelEvent(QWheelEvent*)),this,SLOT(changeLayer(QWheelEvent*)));
 	connect(lab_img, SIGNAL(mousePressed(QMouseEvent*)),this,SLOT(labMouseClicked(QMouseEvent*)));
-	connect(lab_img, SIGNAL(mouseMoved(QMouseEvent*)),this,SLOT(labMouseMoved(QMouseEvent*)));
+	//connect(lab_img, SIGNAL(mouseMoved(QMouseEvent*)),this,SLOT(labMouseMoved(QMouseEvent*)));
 	connect(sli_z, SIGNAL(valueChanged(int)), this, SLOT(changeToNthLayer(int)));
 
 	but_up->setDisabled(true);
@@ -146,6 +146,8 @@ void ueno_viewer::Init()
 	vfmat.clear();
 	//vc2.clear();
 	//vc3.clear();
+	txt_clicked->setText("");
+	vfilename.clear();
 }
 
 
@@ -239,25 +241,28 @@ void ueno_viewer::changeToNthLayer(int i){
 
 bool ueno_viewer::loadImg(){
 
-	Init();
+
 	
 	QDir dir = appsettings->value("readdir").toString();
 	qDebug() << dir.absolutePath();
 
 	//dialog
-	QString fileName = QFileDialog::getOpenFileName(
+	QString jsonFileName = QFileDialog::getOpenFileName(
 		this,
 		tr("Open files"),
 		dir.absolutePath(),
 		tr("JSON Files (*.json);;All Files (*)"));
-	if(fileName.isEmpty())return false;
+	if(jsonFileName.isEmpty())return false;
 
 	//dir path
-	dir = QFileInfo(fileName).absoluteDir();
+	dir = QFileInfo(jsonFileName).absoluteDir();
 	appsettings->setValue("readdir", dir.absolutePath());
 
+	//initialize
+	Init();
+
 	//file open
-	QFile file((const char *)fileName.toLatin1().data());
+	QFile file((const char *)jsonFileName.toLatin1().data());
 	if (!file.open(QIODevice::ReadOnly)) return false;
 
 	//json file
@@ -283,6 +288,8 @@ bool ueno_viewer::loadImg(){
 		std::string dirpath = dir.absolutePath().toLocal8Bit().constData();
 		std::string filename = array_images.at(p).toObject()["Path"].toString().toLocal8Bit().constData();
 		std::string filefullpath = dirpath + "/" + filename;
+
+		vfilename.push_back(QString::fromStdString(filename));
 
 		cv::Mat mat1 = cv::imread(filefullpath, 0);//gray scale
 		cv::cvtColor( mat1, mat1, CV_GRAY2BGR );
@@ -340,20 +347,20 @@ bool ueno_viewer::loadImg(){
 	sli_z->setEnabled(true);
 	sli_z->setMaximum(vfmat.size()-1);
 
-	line_file->setText(QString("%1").arg(fileName));
+	line_file->setText(QString("%1").arg(jsonFileName));
 
 
 	//sub-display
-	QImage image_o(	9*24, 
-					9*24, 
+	QImage image_o(	9*12, 
+					9*12, 
 					QImage::Format_RGB888);
 	image_o = image_o.convertToFormat(QImage::Format_RGB32);
 	lab_img_o->setPixmap(QPixmap::fromImage(image_o));
 
 	
 	//sub-display
-	QImage image_f(	9*24, 
-					9*24, 
+	QImage image_f(	9*12, 
+					9*12, 
 					QImage::Format_RGB888);
 	image_f = image_f.convertToFormat(QImage::Format_RGB32);
 	lab_img_f->setPixmap(QPixmap::fromImage(image_f));
@@ -391,6 +398,9 @@ void ueno_viewer::labMouseClicked(QMouseEvent* e){
 		myMenu.addAction("Get the darkest in 50layers");
 		myMenu.addAction("Set the start point");
 		myMenu.addAction("Set the end point");
+		myMenu.addAction("alpha");
+		myMenu.addAction("vertex");
+		myMenu.addAction("capture");
 
 		QAction* selectedItem = myMenu.exec(globalPos);
 		if (selectedItem){
@@ -406,7 +416,6 @@ void ueno_viewer::labMouseClicked(QMouseEvent* e){
 				str += QString("50000000\n");
 				txt_clicked->setText(str);
 				getTheDarkestZ(e->x(), e->y(), ipict, 50);
-
 			}
 			else if (selectedItem->text() == "Set the start point"){
 				start_x = e->x();
@@ -416,8 +425,6 @@ void ueno_viewer::labMouseClicked(QMouseEvent* e){
 				QString str = txt_clicked->toPlainText();
 				str += QString("start pos: %1 %2 %3\n").arg(start_x).arg(start_y).arg(start_z);
 				txt_clicked->setText(str);
-
-
 			}
 			else if (selectedItem->text() == "Set the end point"){
 				end_x = e->x();
@@ -447,6 +454,23 @@ void ueno_viewer::labMouseClicked(QMouseEvent* e){
 				double theta = acos(cos_theta) * 180 / M_PI;
 				str += QString("Angle theta= %1\n").arg(theta);
 
+				txt_clicked->setText(str);
+			}
+			else if (selectedItem->text() == "alpha"){
+
+				QString str = txt_clicked->toPlainText();
+				str += QString("%1 %2 %3 a\n").arg(vfilename[ipict]).arg(e->x()).arg(e->y());
+				txt_clicked->setText(str);
+			}
+			else if (selectedItem->text() == "vertex"){
+				QString str = txt_clicked->toPlainText();
+				str += QString("%1 %2 %3 v\n").arg(vfilename[ipict]).arg(e->x()).arg(e->y());
+				txt_clicked->setText(str);
+
+			}
+			else if (selectedItem->text() == "capture"){
+				QString str = txt_clicked->toPlainText();
+				str += QString("%1 %2 %3 c\n").arg(vfilename[ipict]).arg(e->x()).arg(e->y());
 				txt_clicked->setText(str);
 			}
 
@@ -495,7 +519,7 @@ void ueno_viewer::updateSubDisplay(QMouseEvent* e){
 
 	//update sub-display for original img
 	if ((cx-4)>=0 && (cy-4)>=0 &&(cx+4)<=wi  && (cy+4)<=he ) {
-		const int cellsize = 24;//should be 4*n;
+		const int cellsize = 12;//should be 4*n;
 		cv::Mat mat_o = cv::Mat(9*cellsize, 9*cellsize, CV_8UC3);
 
 		for(int iy=0; iy<9; iy++){
