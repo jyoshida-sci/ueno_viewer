@@ -263,7 +263,7 @@ bool ueno_viewer::loadImg(){
 	qDebug() << dir.absolutePath();
 
 	//dialog
-	QString fileName = QFileDialog::getOpenFileName(
+	fileName = QFileDialog::getOpenFileName(
 		this,
 		tr("Open files"),
 		dir.absolutePath(),
@@ -322,7 +322,6 @@ bool ueno_viewer::loadImg(){
 	}
 	else if (suffix == "dat" || suffix == "DAT"){
 
-
 		document_unit = "---";
 		lab_stg_unit->setText("[" + document_unit + "]");
 
@@ -336,12 +335,9 @@ bool ueno_viewer::loadImg(){
 		viewy = 0.0;
 		viewz = 0.0;
 
-
 		QDataStream in(&file);
-
 		const int pixelperpage = wi*he;
 		std::vector<char*> vbd;//vector binarized data
-
 
 		while (!in.atEnd()) {
 			cv::Mat mat1(he, wi, CV_8U);
@@ -359,10 +355,7 @@ bool ueno_viewer::loadImg(){
 
 			free(b);
 		}
-
 	}
-
-
 
 	for (int i = 0; i < vomat.size(); i++){
 		cv::Mat mat2 = vomat[i].clone();
@@ -379,8 +372,6 @@ bool ueno_viewer::loadImg(){
 
 		vfmat.push_back(mat2);
 	}
-
-
 
 
 	//•À—ñˆ—‚Å‚Íˆ—‚Ì‡”Ô‚Í‚»‚Ì“s“x•Ï‚í‚éB‡”Ô‚ª•Ï‚í‚Á‚Ä‚à–â‘è‚È‚¢ˆ—‚ð‚±‚±‚Å‚â‚Á‚Ä‚¢‚éB
@@ -680,28 +671,43 @@ void ueno_viewer::writeTxtFile(){
 
 void ueno_viewer::readPrevFile(){
 	int i = getTheOrdinalInCurrentDir();
-	qDebug() << QString("%1\n").arg(i);
+	readIthFileInCurrentDir(i + 1);
 }
 
 
 
 void ueno_viewer::readNextFile(){
+	int i = getTheOrdinalInCurrentDir();
+	readIthFileInCurrentDir(i - 1);
 }
 
 
 int ueno_viewer::getTheOrdinalInCurrentDir(){
 
-	QStringList path_list = QDir().entryList();
-	QStringList::const_iterator path_iter;
-	for (path_iter = path_list.constBegin(); path_iter != path_list.constEnd(); ++path_iter){
-		printf("%s\n", (*path_iter).toLatin1().data());
+	QDir dir = appsettings->value("readdir").toString();
+	QStringList filter;
+	filter += "*.dat";
+	filter += "*.json";
+	int ifile = 0;
+
+	QStringList path_list = dir.entryList(filter, QDir::Files);
+
+	for (int i = 0; i < path_list.size(); i++){
+		qDebug() << path_list[i];
+
+		if (path_list[i] == QFileInfo(fileName).fileName()){
+			ifile = i;
+			break;
+		}
+
 	}
 
-	return 99;
+	return ifile;
 }
 
 
 bool ueno_viewer::readIthFileInCurrentDir(int i){
+	qDebug() << "readIthFileInCurrentDir" << i;
 	return true;
 }
 

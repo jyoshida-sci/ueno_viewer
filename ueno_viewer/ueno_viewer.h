@@ -50,6 +50,7 @@ private slots:
 
 private:
 	QSettings* appsettings;
+	QString fileName;
 
 	std::vector<cv::Mat> vomat;//original
 	std::vector<cv::Mat> vfmat;//filterd
