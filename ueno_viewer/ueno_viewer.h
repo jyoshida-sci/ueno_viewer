@@ -64,10 +64,12 @@ private:
 	QLabel* lab_pix;
 	QLabel* lab_pix_cl;
 	QLabel* lab_pix_dr;
-	
+	QLabel* lab_pix_unit;
+
 	QLabel* lab_stg;
 	QLabel* lab_stg_cl;
 	QLabel* lab_stg_dr;
+	QLabel* lab_stg_unit;
 
 	QLineEdit* line_file;
 	QPushButton* but_file;
@@ -85,6 +87,9 @@ private:
 
 
 	int ipict;
+
+	QString document_unit;
+
 	int lx,ly,lz;
 	int wi;
 	int he;

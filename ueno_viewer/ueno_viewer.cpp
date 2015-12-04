@@ -54,7 +54,7 @@ ueno_viewer::ueno_viewer(QWidget *parent)
 	lab_img_f = new QLabel();
 	lay->addWidget(lab_img_f, 2, 0);
 	lab_img = new QClickableLabel();
-	lab_img->setMouseTracking(true);
+	lab_img->setMouseTracking(false);
 	lay->addWidget(lab_img, 1, 1, 2, 1);
 	but_down = new QPushButton(tr("&Next"));
 	lay->addWidget(but_down, 3, 0, 1, 2);
@@ -71,6 +71,9 @@ ueno_viewer::ueno_viewer(QWidget *parent)
 	lab_pix_dr = new QLabel();
 	lab_pix_dr->setFont(QFont("Arial",10));
 	lay_click->addWidget(lab_pix_dr);
+	lab_pix_unit = new QLabel("[pix]");
+	lab_pix_unit->setFont(QFont("Arial", 10));
+	lay_click->addWidget(lab_pix_unit);
 	lay->addLayout(lay_click, 4, 0, 1, 2);
 
 	QHBoxLayout *lay_stage = new QHBoxLayout();
@@ -83,6 +86,9 @@ ueno_viewer::ueno_viewer(QWidget *parent)
 	lab_stg_dr = new QLabel();
 	lab_stg_dr->setFont(QFont("Arial", 10));
 	lay_stage->addWidget(lab_stg_dr);
+	lab_stg_unit = new QLabel("[micron]");
+	lab_stg_unit->setFont(QFont("Arial", 10));
+	lay_stage->addWidget(lab_stg_unit);
 	lay->addLayout(lay_stage, 5, 0, 1, 2);
 
 
@@ -268,15 +274,20 @@ bool ueno_viewer::loadImg(){
 	QJsonObject jsonobj = jsondoc.object();
 	QJsonArray array_images = jsonobj["Images"].toArray();
 
+
+	document_unit = jsonobj["DocumentType"].toObject()["unit"].toString();
+	lab_stg_unit->setText("[" + document_unit + "]");
+
 	wi = jsonobj["ImageType"].toObject()["Width"].toInt();
 	he = jsonobj["ImageType"].toObject()["Height"].toInt();
-	Sh = jsonobj["Sh"].toDouble();
+	Sh = jsonobj["EmulsionType"].toObject()["Sh"].toDouble();
 	um_px = jsonobj["Interval"].toArray().at(0).toDouble();
 	um_py = jsonobj["Interval"].toArray().at(1).toDouble();
 	um_pz = jsonobj["Interval"].toArray().at(2).toDouble();
 	viewx = jsonobj["InitialPos"].toArray().at(0).toDouble();
 	viewy = jsonobj["InitialPos"].toArray().at(1).toDouble();
 	viewz = jsonobj["InitialPos"].toArray().at(2).toDouble();
+
 
 	//read img files
 	for(int p=0; p<array_images.count(); p++){
@@ -334,6 +345,8 @@ bool ueno_viewer::loadImg(){
 	//	cv::circle(vfmat[n], cv::Point(vc3[c].x,vc3[c].y), 1, cv::Scalar(255,0,0));
 	//}
 	
+	lab_img->setMouseTracking(true);
+
 	ipict=0;
 	if ( !updateImg(ipict) ) return false;
 	but_down->setEnabled(true);
