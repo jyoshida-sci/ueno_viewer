@@ -44,6 +44,9 @@ private slots:
 	void labMouseMoved(QMouseEvent *);
 	void updateSubDisplay(QMouseEvent *);
 	void writeTxtFile();
+	void readPrevFile();
+	void readNextFile();
+
 
 private:
 	QSettings* appsettings;
@@ -85,6 +88,9 @@ private:
 	QTextEdit* txt_clicked;
 	QSlider* sli_z;
 
+	QPushButton* but_prevfile;
+	QPushButton* but_nextfile;
+
 
 	int ipict;
 
@@ -101,6 +107,11 @@ private:
 
 	void Init();
 	void getTheDarkestZ(int x, int y, int z, int range);
+
+	int getTheOrdinalInCurrentDir();
+	bool readIthFileInCurrentDir(int i);
+
+
 };
 
 #endif // UENO_VIEWER_H

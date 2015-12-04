@@ -104,7 +104,7 @@ ueno_viewer::ueno_viewer(QWidget *parent)
 	lay_file->addWidget(but_file);
 	lay_file->addWidget(lcd_img);
 	lay_file->addWidget(chk_filterd);
-	lay->addLayout(lay_file, 6, 0, 1, 2);
+	lay->addLayout(lay_file, 6, 0, 1, 4);
 
 	sli_z = new QSlider();
 	lay->addWidget(sli_z, 0, 2, 6, 1);
@@ -117,6 +117,15 @@ ueno_viewer::ueno_viewer(QWidget *parent)
 	lay->addWidget(but_writxt, 5, 3, 1, 1);
 	//but_make = new QPushButton(tr("&Make pict"));
 	//lay->addWidget(but_make, 4, 2, 1, 1);
+
+
+	//prev,nextfile
+	QHBoxLayout *lay_prevnextfile = new QHBoxLayout();
+	but_prevfile = new QPushButton(tr("Prev File"));
+	lay_prevnextfile->addWidget(but_prevfile);
+	but_nextfile = new QPushButton(tr("Next File"));
+	lay_prevnextfile->addWidget(but_nextfile);
+	lay->addLayout(lay_prevnextfile, 7, 0, 1, 4);
 
 
 	//layout
@@ -133,6 +142,9 @@ ueno_viewer::ueno_viewer(QWidget *parent)
 	connect(lab_img, SIGNAL(mousePressed(QMouseEvent*)),this,SLOT(labMouseClicked(QMouseEvent*)));
 	connect(lab_img, SIGNAL(mouseMoved(QMouseEvent*)),this,SLOT(labMouseMoved(QMouseEvent*)));
 	connect(sli_z, SIGNAL(valueChanged(int)), this, SLOT(changeToNthLayer(int)));
+
+	connect(but_prevfile, SIGNAL(clicked()), this, SLOT(readPrevFile()));
+	connect(but_nextfile, SIGNAL(clicked()), this, SLOT(readNextFile()));
 
 	but_up->setDisabled(true);
 	but_down->setDisabled(true);
@@ -662,6 +674,37 @@ void ueno_viewer::writeTxtFile(){
 		}
 
 }
+
+
+
+
+void ueno_viewer::readPrevFile(){
+	int i = getTheOrdinalInCurrentDir();
+	qDebug() << QString("%1\n").arg(i);
+}
+
+
+
+void ueno_viewer::readNextFile(){
+}
+
+
+int ueno_viewer::getTheOrdinalInCurrentDir(){
+
+	QStringList path_list = QDir().entryList();
+	QStringList::const_iterator path_iter;
+	for (path_iter = path_list.constBegin(); path_iter != path_list.constEnd(); ++path_iter){
+		printf("%s\n", (*path_iter).toLatin1().data());
+	}
+
+	return 99;
+}
+
+
+bool ueno_viewer::readIthFileInCurrentDir(int i){
+	return true;
+}
+
 
 void ueno_viewer::getTheDarkestZ(int x, int y, int z,  int range)
 {
