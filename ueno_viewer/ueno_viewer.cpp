@@ -255,7 +255,7 @@ bool ueno_viewer::loadImg(){
 		this,
 		tr("Open files"),
 		dir.absolutePath(),
-		tr("JSON Files (*.json);;All Files (*)"));
+		tr("JSON Files (*.json);Kanda-Dat Files (*.dat);;All Files (*)"));
 	if(fileName.isEmpty())return false;
 
 	//dir path
@@ -266,40 +266,94 @@ bool ueno_viewer::loadImg(){
 	QFile file((const char *)fileName.toLatin1().data());
 	if (!file.open(QIODevice::ReadOnly)) return false;
 
-	//json file
-	QString content = file.readAll();
-	file.close();
 
-	QJsonDocument jsondoc = QJsonDocument::fromJson(content.toUtf8());
-	QJsonObject jsonobj = jsondoc.object();
-	QJsonArray array_images = jsonobj["Images"].toArray();
+	QString suffix = QFileInfo(fileName).suffix();
 
 
-	document_unit = jsonobj["DocumentType"].toObject()["unit"].toString();
-	lab_stg_unit->setText("[" + document_unit + "]");
+	if (suffix == "json" || suffix == "JSON"){
+		//json file
+		QString content = file.readAll();
+		file.close();
 
-	wi = jsonobj["ImageType"].toObject()["Width"].toInt();
-	he = jsonobj["ImageType"].toObject()["Height"].toInt();
-	Sh = jsonobj["EmulsionType"].toObject()["Sh"].toDouble();
-	um_px = jsonobj["Interval"].toArray().at(0).toDouble();
-	um_py = jsonobj["Interval"].toArray().at(1).toDouble();
-	um_pz = jsonobj["Interval"].toArray().at(2).toDouble();
-	viewx = jsonobj["InitialPos"].toArray().at(0).toDouble();
-	viewy = jsonobj["InitialPos"].toArray().at(1).toDouble();
-	viewz = jsonobj["InitialPos"].toArray().at(2).toDouble();
+		QJsonDocument jsondoc = QJsonDocument::fromJson(content.toUtf8());
+		QJsonObject jsonobj = jsondoc.object();
+		QJsonArray array_images = jsonobj["Images"].toArray();
 
 
-	//read img files
-	for(int p=0; p<array_images.count(); p++){
-		std::string dirpath = dir.absolutePath().toLocal8Bit().constData();
-		std::string filename = array_images.at(p).toObject()["Path"].toString().toLocal8Bit().constData();
-		std::string filefullpath = dirpath + "/" + filename;
+		document_unit = jsonobj["DocumentType"].toObject()["unit"].toString();
+		lab_stg_unit->setText("[" + document_unit + "]");
 
-		cv::Mat mat1 = cv::imread(filefullpath, 0);//gray scale
-		cv::cvtColor( mat1, mat1, CV_GRAY2BGR );
-		vomat.push_back(mat1);
+		wi = jsonobj["ImageType"].toObject()["Width"].toInt();
+		he = jsonobj["ImageType"].toObject()["Height"].toInt();
+		Sh = jsonobj["EmulsionType"].toObject()["Sh"].toDouble();
+		um_px = jsonobj["Interval"].toArray().at(0).toDouble();
+		um_py = jsonobj["Interval"].toArray().at(1).toDouble();
+		um_pz = jsonobj["Interval"].toArray().at(2).toDouble();
+		viewx = jsonobj["InitialPos"].toArray().at(0).toDouble();
+		viewy = jsonobj["InitialPos"].toArray().at(1).toDouble();
+		viewz = jsonobj["InitialPos"].toArray().at(2).toDouble();
 
-		cv::Mat mat2 = mat1.clone();	
+
+		//read img files
+		for (int p = 0; p<array_images.count(); p++){
+			std::string dirpath = dir.absolutePath().toLocal8Bit().constData();
+			std::string filename = array_images.at(p).toObject()["Path"].toString().toLocal8Bit().constData();
+			std::string filefullpath = dirpath + "/" + filename;
+
+			cv::Mat mat1 = cv::imread(filefullpath, 0);//gray scale
+			cv::cvtColor(mat1, mat1, CV_GRAY2BGR);
+			vomat.push_back(mat1);
+
+
+		}
+
+	}
+	else if (suffix == "dat" || suffix == "DAT"){
+
+
+		document_unit = "---";
+		lab_stg_unit->setText("[" + document_unit + "]");
+
+		wi = 512;
+		he = 440;
+		Sh = 0.0;
+		um_px = 0.0;
+		um_py = 0.0;
+		um_pz = 0.0;
+		viewx = 0.0;
+		viewy = 0.0;
+		viewz = 0.0;
+
+
+		QDataStream in(&file);
+
+		const int pixelperpage = wi*he;
+		std::vector<char*> vbd;//vector binarized data
+
+
+		while (!in.atEnd()) {
+			cv::Mat mat1(he, wi, CV_8U);
+
+			char* b = (char *)malloc(pixelperpage);
+			if (b == NULL)return false;
+			in.readRawData(b, pixelperpage);
+
+			for (int by = 0; by < pixelperpage; by++){
+				char c = b[by];
+				mat1.data[by] = c;
+			}
+			cv::cvtColor(mat1, mat1, CV_GRAY2BGR);
+			vomat.push_back(mat1);
+
+			free(b);
+		}
+
+	}
+
+
+
+	for (int i = 0; i < vomat.size(); i++){
+		cv::Mat mat2 = vomat[i].clone();
 		cv::GaussianBlur(mat2, mat2, cv::Size(3, 3), -1);
 		cv::Mat smooth_img = mat2.clone();
 		cv::GaussianBlur(smooth_img, smooth_img, cv::Size(31, 31), -1);
