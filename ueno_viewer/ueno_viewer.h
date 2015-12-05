@@ -18,6 +18,7 @@ class QCheckBox;
 class QTextEdit;
 class QClickableLabel;
 class QSlider;
+class QDir;
 
 
 class ueno_viewer : public QWidget
@@ -50,6 +51,7 @@ private slots:
 
 private:
 	QSettings* appsettings;
+	QString dirName;
 	QString fileName;
 
 	std::vector<cv::Mat> vomat;//original
@@ -109,7 +111,8 @@ private:
 	void Init();
 	void getTheDarkestZ(int x, int y, int z, int range);
 
-	int getTheOrdinalInCurrentDir();
+
+	bool ImportFile(QString FileName);
 	bool readIthFileInCurrentDir(int i);
 
 

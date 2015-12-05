@@ -148,6 +148,8 @@ ueno_viewer::ueno_viewer(QWidget *parent)
 
 	but_up->setDisabled(true);
 	but_down->setDisabled(true);
+	but_prevfile->setDisabled(true);
+	but_nextfile->setDisabled(true);
 	sli_z->setDisabled(true);
 
 }
@@ -255,28 +257,18 @@ void ueno_viewer::changeToNthLayer(int i){
 }
 
 
-bool ueno_viewer::loadImg(){
 
-	Init();
+
+
+bool ueno_viewer::ImportFile(QString myFileName){
 	
-	QDir dir = appsettings->value("readdir").toString();
-	qDebug() << dir.absolutePath();
-
-	//dialog
-	fileName = QFileDialog::getOpenFileName(
-		this,
-		tr("Open files"),
-		dir.absolutePath(),
-		tr("JSON Files (*.json);Kanda-Dat Files (*.dat);;All Files (*)"));
-	if(fileName.isEmpty())return false;
-
-	//dir path
-	dir = QFileInfo(fileName).absoluteDir();
-	appsettings->setValue("readdir", dir.absolutePath());
 
 	//file open
-	QFile file((const char *)fileName.toLatin1().data());
+	QFile file((const char *)myFileName.toLatin1().data());
 	if (!file.open(QIODevice::ReadOnly)) return false;
+
+	Init();
+	fileName = myFileName;
 
 
 	QString suffix = QFileInfo(fileName).suffix();
@@ -308,7 +300,7 @@ bool ueno_viewer::loadImg(){
 
 		//read img files
 		for (int p = 0; p<array_images.count(); p++){
-			std::string dirpath = dir.absolutePath().toLocal8Bit().constData();
+			std::string dirpath = QDir(dirName).absolutePath().toLocal8Bit().constData();
 			std::string filename = array_images.at(p).toObject()["Path"].toString().toLocal8Bit().constData();
 			std::string filefullpath = dirpath + "/" + filename;
 
@@ -375,18 +367,18 @@ bool ueno_viewer::loadImg(){
 
 
 	//•À—ñˆ—‚Å‚Íˆ—‚Ì‡”Ô‚Í‚»‚Ì“s“x•Ï‚í‚éB‡”Ô‚ª•Ï‚í‚Á‚Ä‚à–â‘è‚È‚¢ˆ—‚ð‚±‚±‚Å‚â‚Á‚Ä‚¢‚éB
-	#ifdef _OPENMP// without_openmp: 25sec / openmp:7.5sec
-	#pragma omp parallel for
-	#endif
-	for(int p=0; p<vomat.size(); p++){
+#ifdef _OPENMP// without_openmp: 25sec / openmp:7.5sec
+#pragma omp parallel for
+#endif
+	for (int p = 0; p<vomat.size(); p++){
 
 		//Clustring2D c2d;
 		//vc2 =  c2d.DoClustring2D(p, vfmat[p], 5.0);
 		//vc2.insert(vc2.end(), vc.begin(), vc.end());
 
-		double min,max;
-		cv::minMaxLoc( vfmat[p],&min,&max,0,0);
-		cv::convertScaleAbs( vfmat[p], vfmat[p], 255/(max-min), -255*min/(max-min));
+		double min, max;
+		cv::minMaxLoc(vfmat[p], &min, &max, 0, 0);
+		cv::convertScaleAbs(vfmat[p], vfmat[p], 255 / (max - min), -255 * min / (max - min));
 		//cv::cvtColor(  vfmat[p], vfmat[p], CV_GRAY2BGR );
 
 		//for(int c=0; c<vc.size(); c++){
@@ -401,34 +393,65 @@ bool ueno_viewer::loadImg(){
 	//	int n = (int)( vc3[c].z < 0.0 ? vc3[c].z-0.5 : vc3[c].z+0.5 );//round
 	//	cv::circle(vfmat[n], cv::Point(vc3[c].x,vc3[c].y), 1, cv::Scalar(255,0,0));
 	//}
-	
+
 	lab_img->setMouseTracking(true);
 
-	ipict=0;
-	if ( !updateImg(ipict) ) return false;
+	ipict = 0;
+	if (!updateImg(ipict)) return false;
 	but_down->setEnabled(true);
 	sli_z->setEnabled(true);
-	sli_z->setMaximum(vfmat.size()-1);
+	sli_z->setMaximum(vfmat.size() - 1);
+	but_prevfile->setEnabled(true);
+	but_nextfile->setEnabled(true);
+
 
 	line_file->setText(QString("%1").arg(fileName));
 
 
 	//sub-display
-	QImage image_o(	9*24, 
-					9*24, 
-					QImage::Format_RGB888);
+	QImage image_o(9 * 24,
+		9 * 24,
+		QImage::Format_RGB888);
 	image_o = image_o.convertToFormat(QImage::Format_RGB32);
 	lab_img_o->setPixmap(QPixmap::fromImage(image_o));
 
-	
+
 	//sub-display
-	QImage image_f(	9*24, 
-					9*24, 
-					QImage::Format_RGB888);
+	QImage image_f(9 * 24,
+		9 * 24,
+		QImage::Format_RGB888);
 	image_f = image_f.convertToFormat(QImage::Format_RGB32);
 	lab_img_f->setPixmap(QPixmap::fromImage(image_f));
 
 	return true;
+}
+
+
+
+bool ueno_viewer::loadImg(){
+
+	
+	dirName = appsettings->value("readdir").toString();
+	qDebug() << QDir(dirName).absolutePath();
+
+	QDir dir = QDir(dirName);
+
+	//dialog
+	fileName = QFileDialog::getOpenFileName(
+		this,
+		tr("Open files"),
+		dir.absolutePath(),
+		tr("JSON Files (*.json);Kanda-Dat Files (*.dat);;All Files (*)"));
+	if(fileName.isEmpty())return false;
+
+	//dir path
+	dir = QFileInfo(fileName).absoluteDir();
+	appsettings->setValue("readdir", dir.absolutePath());
+
+	
+	bool status = ImportFile(fileName);
+
+	return status;
 }
 
 
@@ -670,19 +693,18 @@ void ueno_viewer::writeTxtFile(){
 
 
 void ueno_viewer::readPrevFile(){
-	int i = getTheOrdinalInCurrentDir();
-	readIthFileInCurrentDir(i + 1);
+	readIthFileInCurrentDir(-1);
 }
 
 
 
 void ueno_viewer::readNextFile(){
-	int i = getTheOrdinalInCurrentDir();
-	readIthFileInCurrentDir(i - 1);
+	readIthFileInCurrentDir(1);
 }
 
 
-int ueno_viewer::getTheOrdinalInCurrentDir(){
+bool ueno_viewer::readIthFileInCurrentDir(int i){
+
 
 	QDir dir = appsettings->value("readdir").toString();
 	QStringList filter;
@@ -692,22 +714,39 @@ int ueno_viewer::getTheOrdinalInCurrentDir(){
 
 	QStringList path_list = dir.entryList(filter, QDir::Files);
 
-	for (int i = 0; i < path_list.size(); i++){
-		qDebug() << path_list[i];
+	for (int j = 0; j < path_list.size(); j++){
+		qDebug() << path_list[j];
 
-		if (path_list[i] == QFileInfo(fileName).fileName()){
-			ifile = i;
+		if (path_list[j] == QFileInfo(fileName).fileName()){
+			ifile = j;
 			break;
 		}
 
 	}
 
-	return ifile;
-}
+	if (ifile + i < 0){
+		but_prevfile->setDisabled(true);
+		return false;
+	}
+	else if (ifile + i == path_list.size()){
+		but_nextfile->setDisabled(true);
+		return false;
+	}
+	else{
+		but_prevfile->setEnabled(true);
+		but_nextfile->setEnabled(true);
+	}
 
 
-bool ueno_viewer::readIthFileInCurrentDir(int i){
-	qDebug() << "readIthFileInCurrentDir" << i;
+
+	QString ithFileName = path_list[ifile + i];
+	QString ithFileNamePath = appsettings->value("readdir").toString() + "/" + ithFileName;
+
+
+	ImportFile(ithFileNamePath);
+
+
+
 	return true;
 }
 
