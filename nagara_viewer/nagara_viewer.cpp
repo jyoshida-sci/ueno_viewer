@@ -39,10 +39,10 @@ nagara_viewer::nagara_viewer(QWidget *parent)
 	lay->addWidget(but_up);
 	lab_img1 = new QLabel();
 	lay->addWidget(lab_img1);
-	lab_img2 = new QLabel();
-	lay->addWidget(lab_img2);
-	lab_img3 = new QLabel();
-	lay->addWidget(lab_img3);
+	//lab_img2 = new QLabel();
+	//lay->addWidget(lab_img2);
+	//lab_img3 = new QLabel();
+	//lay->addWidget(lab_img3);
 
 	but_down = new QPushButton(tr("&Down"));
 	lay->addWidget(but_down);
@@ -88,21 +88,21 @@ bool nagara_viewer::updateImg(int v, int i){//v: not used yet
 		}
 	}
 
-	cv::Mat mat2(he, wi, CV_8U);
-	for (int by = 0; by<bpp; by++){
-		char c = vbd[i + nlayer][by];
-		for (int j = 0; j<8; j++){
-			mat2.data[by * 8 + j] = (c >> j & 1) * 255;
-		}
-	}
+	//cv::Mat mat2(he, wi, CV_8U);
+	//for (int by = 0; by<bpp; by++){
+	//	char c = vbd[i + nlayer][by];
+	//	for (int j = 0; j<8; j++){
+	//		mat2.data[by * 8 + j] = (c >> j & 1) * 255;
+	//	}
+	//}
 
-	cv::Mat mat3(he, wi, CV_8U);
-	for (int by = 0; by<bpp; by++){
-		char c = vbd[i + nlayer * 2][by];
-		for (int j = 0; j<8; j++){
-			mat3.data[by * 8 + j] = (c >> j & 1) * 255;
-		}
-	}
+	//cv::Mat mat3(he, wi, CV_8U);
+	//for (int by = 0; by<bpp; by++){
+	//	char c = vbd[i + nlayer * 2][by];
+	//	for (int j = 0; j<8; j++){
+	//		mat3.data[by * 8 + j] = (c >> j & 1) * 255;
+	//	}
+	//}
 
 	//cv::imwrite("1.png",mat1);
 	//cv::imwrite("2.png",mat2);
@@ -112,8 +112,8 @@ bool nagara_viewer::updateImg(int v, int i){//v: not used yet
 	//cv::resize(mat2, mat2, cv::Size(), 0.5, 0.5);
 	if (chk_halfsize->isChecked()){
 		cv::pyrDown(mat1, mat1);
-		cv::pyrDown(mat2, mat2);
-		cv::pyrDown(mat3, mat3);
+		//cv::pyrDown(mat2, mat2);
+		//cv::pyrDown(mat3, mat3);
 	}
 
 	QImage image1(mat1.data,
@@ -124,21 +124,21 @@ bool nagara_viewer::updateImg(int v, int i){//v: not used yet
 	image1 = image1.convertToFormat(QImage::Format_RGB32);
 	lab_img1->setPixmap(QPixmap::fromImage(image1));
 
-	QImage image2(mat2.data,
-		mat2.cols,
-		mat2.rows,
-		//QImage::Format_RGB32);
-		QImage::Format_Indexed8);
-	image2 = image2.convertToFormat(QImage::Format_RGB32);
-	lab_img2->setPixmap(QPixmap::fromImage(image2));
+	//QImage image2(mat2.data,
+	//	mat2.cols,
+	//	mat2.rows,
+	//	//QImage::Format_RGB32);
+	//	QImage::Format_Indexed8);
+	//image2 = image2.convertToFormat(QImage::Format_RGB32);
+	//lab_img2->setPixmap(QPixmap::fromImage(image2));
 
-	QImage image3(mat3.data,
-		mat3.cols,
-		mat3.rows,
-		//QImage::Format_RGB32);
-		QImage::Format_Indexed8);
-	image3 = image3.convertToFormat(QImage::Format_RGB32);
-	lab_img3->setPixmap(QPixmap::fromImage(image3));
+	//QImage image3(mat3.data,
+	//	mat3.cols,
+	//	mat3.rows,
+	//	//QImage::Format_RGB32);
+	//	QImage::Format_Indexed8);
+	//image3 = image3.convertToFormat(QImage::Format_RGB32);
+	//lab_img3->setPixmap(QPixmap::fromImage(image3));
 
 	lcd_ipict->display(i);
 	return true;
@@ -149,16 +149,16 @@ bool nagara_viewer::changeLayer(QWheelEvent *event)
 {
 	if (event->delta()<0){
 		ipict++;
-		if (ipict == vbd.size() - nlayer * 2)ipict = vbd.size() - (nlayer * 2 + 1);
+		if (ipict == vbd.size() ) ipict = vbd.size()-1;
 		if (ipict != 0) but_up->setEnabled(true);
-		if (ipict == vbd.size() - (nlayer * 2 + 1)) but_down->setDisabled(true);
+		if (ipict == vbd.size()-1 ) but_down->setDisabled(true);
 		if (!updateImg(1, ipict)) return false;
 	}
 	else{
 		ipict--;
 		if (ipict == -1)ipict = 0;
 		if (ipict == 0) but_up->setDisabled(true);
-		if (ipict != vbd.size() - (nlayer * 2 + 1)) but_down->setEnabled(true);
+		if (ipict != vbd.size() -1 ) but_down->setEnabled(true);
 		if (!updateImg(1, ipict)) return false;
 	}
 	return true;
@@ -171,7 +171,7 @@ bool nagara_viewer::ImgUp()
 	ipict--;
 	if (!updateImg(1, ipict)) return false;
 	if (ipict == 0) but_up->setDisabled(true);
-	if (ipict != vbd.size() - (nlayer * 2 + 1)) but_down->setEnabled(true);
+	if (ipict != vbd.size()-1 ) but_down->setEnabled(true);
 	return true;
 }
 
@@ -180,7 +180,7 @@ bool nagara_viewer::ImgDown()
 	ipict++;
 	if (!updateImg(1, ipict)) return false;
 	if (ipict != 0) but_up->setEnabled(true);
-	if (ipict == vbd.size() - (nlayer * 2 + 1)) but_down->setDisabled(true);
+	if (ipict == vbd.size()-1 ) but_down->setDisabled(true);
 	return true;
 }
 
