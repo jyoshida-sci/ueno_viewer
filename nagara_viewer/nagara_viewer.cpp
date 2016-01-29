@@ -26,6 +26,7 @@ nagara_viewer::nagara_viewer(QWidget *parent)
 	nlayer = appsettings->value("nlayer",40).toInt();
 	wi = appsettings->value("wi",2048).toInt();
 	he = appsettings->value("he",358).toInt();
+	appsettings->setValue("nlayer", nlayer);
 	appsettings->setValue("wi", wi);
 	appsettings->setValue("he", he);
 	ppp = wi*he;//pixel per page
