@@ -1,6 +1,7 @@
 #include "nagara_viewer.h"
 
 #include "qsettings.h"
+#include "qdebug.h"
 
 #include "qlineedit.h"
 #include "qpushbutton.h"
@@ -21,6 +22,16 @@ nagara_viewer::nagara_viewer(QWidget *parent)
 //	ui.setupUi(this);
 
 	appsettings = new QSettings("nagara_viewer.ini", QSettings::IniFormat);
+	
+	nlayer = appsettings->value("nlayer",40).toInt();
+	wi = appsettings->value("wi",2048).toInt();
+	he = appsettings->value("he",358).toInt();
+	appsettings->setValue("wi", wi);
+	appsettings->setValue("he", he);
+	ppp = wi*he;//pixel per page
+	bpp = ppp / 8;//byte per page
+
+
 
 
 	QVBoxLayout* lay = new QVBoxLayout();
@@ -192,18 +203,26 @@ bool nagara_viewer::ImgDown()
 
 
 bool nagara_viewer::loadImg(){
+	
+	dirName = appsettings->value("readdir").toString();
+	qDebug() << QDir(dirName).absolutePath();
+	QDir dir = QDir(dirName);
 
 	Init();
 
-	QString fileName = QFileDialog::getOpenFileName(
+	fileName = QFileDialog::getOpenFileName(
 		this,
 		tr("Open files"),
-		QDir::homePath(),
+		dir.absolutePath(),
 		tr("DAT Files (*.dat);;All Files (*)"));
 	if (fileName.isEmpty())return false;
 
 	QFile file( (const char*) fileName.toLatin1().data() );
 	if (!file.open(QIODevice::ReadOnly)) return false;
+
+	//dir path
+	dir = QFileInfo(fileName).absoluteDir();
+	appsettings->setValue("readdir", dir.absolutePath());
 
 	QDataStream in(&file);
 	while (!in.atEnd()) {

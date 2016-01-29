@@ -40,7 +40,9 @@ private slots:
 private:
 
 	QSettings* appsettings;
-	static const int nlayer = 40;
+	QString dirName;
+	QString fileName;
+
 //	Ui::nagara_viewerClass ui;
 	std::vector<char*> vbd;//vector binarized data
 
@@ -67,11 +69,11 @@ private:
 
 
 	int ipict;
-	static const int wi = 2048;
-//	static const int he = 358;
-	static const int he = 1080;
-	static const int ppp = wi*he;//pixel per page
-	static const int bpp = ppp / 8;//byte per page
+	int nlayer;
+	int wi = 2048;
+	int he = 1080;
+	int ppp = wi*he;//pixel per page
+	int bpp = ppp / 8;//byte per page
 
 	unsigned char* chard;//vector 8bit-char data
 
