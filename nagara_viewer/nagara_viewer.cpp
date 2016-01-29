@@ -1,5 +1,7 @@
 #include "nagara_viewer.h"
 
+#include "qsettings.h"
+
 #include "qlineedit.h"
 #include "qpushbutton.h"
 #include "qlayout.h"
@@ -17,6 +19,9 @@ nagara_viewer::nagara_viewer(QWidget *parent)
 	: QWidget(parent)
 {
 //	ui.setupUi(this);
+
+	appsettings = new QSettings("nagara_viewer.ini", QSettings::IniFormat);
+
 
 	QVBoxLayout* lay = new QVBoxLayout();
 

@@ -6,7 +6,7 @@
 
 #include "..\opencv2411.h"
 
-
+class QSettings;
 class QImage;
 class QLabel;
 class QPixmap;
@@ -38,6 +38,8 @@ private slots:
 
 
 private:
+
+	QSettings* appsettings;
 	static const int nlayer = 40;
 //	Ui::nagara_viewerClass ui;
 	std::vector<char*> vbd;//vector binarized data
