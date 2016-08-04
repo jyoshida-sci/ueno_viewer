@@ -487,16 +487,16 @@ void ueno_viewer::labMouseClicked(QMouseEvent* e){
 
 		QAction* selectedItem = myMenu.exec(globalPos);
 		if (selectedItem){
-			if (selectedItem->text() == "Get the darkest in 25layers_UnderConstruction"){
+			if (selectedItem->text() == "Get the darkest in 25layers"){
 				QString str = txt_clicked->toPlainText();
-				str += QString("25252525\n");
+				str += QString("== +-25 layers==\n");
 				txt_clicked->setText(str);
 				getTheDarkestZ(e->x(), e->y(), ipict, 25);
 
 			}
-			else if (selectedItem->text() == "Get the darkest in 50layers_UnderConstruction"){
+			else if (selectedItem->text() == "Get the darkest in 50layers"){
 				QString str = txt_clicked->toPlainText();
-				str += QString("50000000\n");
+				str += QString("== +-50 layers==\n");
 				txt_clicked->setText(str);
 				getTheDarkestZ(e->x(), e->y(), ipict, 50);
 
@@ -753,13 +753,30 @@ bool ueno_viewer::readIthFileInCurrentDir(int i){
 
 void ueno_viewer::getTheDarkestZ(int x, int y, int z,  int range)
 {
-	//std::vector<double> v_z_pos;
-	//std::vector<double> v_z_bright;
+	std::vector<double> v_z_pos;
+	std::vector<double> v_z_brighto;
+	std::vector<double> v_z_brightf;
 
-	//for(int i=0; i<vomat.size();i++ ){
-	//	v_z_pos.push_back( i );
-	//	v_z_bright.push_back( vomat[i].data[(sony_wi*y+x)*3] );
-	//}
+	int width = vomat[0].cols;
+
+	QString str = txt_clicked->toPlainText();
+
+	int zmin = 0;
+	int zmax = vomat.size() - 1;
+	if (z - range > zmin){ zmin = z - range; }
+	if (z + range < zmax){ zmax = z + range; }
+
+	for(int i=zmin; i<zmax; i++ ){
+		int brio = vomat[i].data[(width*y + x) * 3];//3-channels
+		int brif = vfmat[i].data[(width*y + x) * 3];//3-channels
+		v_z_pos.push_back(i);
+		v_z_brighto.push_back(brio);
+		v_z_brighto.push_back(brif);
+
+		str += QString("%1 %2 %3\n").arg(i).arg(brio).arg(brif);
+	}
+
+	txt_clicked->setText(str);
 
 	//GaussianFitting gf;
 	//FittingResult myfr = gf.Fitting( v_z_pos, v_z_bright, z, range, true);
@@ -772,4 +789,6 @@ void ueno_viewer::getTheDarkestZ(int x, int y, int z,  int range)
 	//str += QString("slope= %1\n").arg(myfr.slope);
 	//str += QString("chi2= %1\n").arg(myfr.chi2);
 	//txt_clicked->setText(str);
+
+
 }
