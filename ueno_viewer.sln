@@ -7,11 +7,14 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ueno_viewer", "ueno_viewer\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5BC29B4E-F88C-49FB-B98D-E7FD258777E1}"
 	ProjectSection(SolutionItems) = preProject
+		camparams.h = camparams.h
 		opencv2411.h = opencv2411.h
 		opencv300.h = opencv300.h
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nagara_viewer", "nagara_viewer\nagara_viewer.vcxproj", "{1116DC01-7B4E-4499-94F8-5B34D38289D9}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libClustring", "libClustring\libClustring.vcxproj", "{051FB72D-3788-4FDA-BA29-D940BC848BE3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,6 +38,12 @@ Global
 		{1116DC01-7B4E-4499-94F8-5B34D38289D9}.Release|Win32.ActiveCfg = Release|Win32
 		{1116DC01-7B4E-4499-94F8-5B34D38289D9}.Release|Win32.Build.0 = Release|Win32
 		{1116DC01-7B4E-4499-94F8-5B34D38289D9}.Release|x64.ActiveCfg = Release|Win32
+		{051FB72D-3788-4FDA-BA29-D940BC848BE3}.Debug|Win32.ActiveCfg = Debug|Win32
+		{051FB72D-3788-4FDA-BA29-D940BC848BE3}.Debug|Win32.Build.0 = Debug|Win32
+		{051FB72D-3788-4FDA-BA29-D940BC848BE3}.Debug|x64.ActiveCfg = Debug|Win32
+		{051FB72D-3788-4FDA-BA29-D940BC848BE3}.Release|Win32.ActiveCfg = Release|Win32
+		{051FB72D-3788-4FDA-BA29-D940BC848BE3}.Release|Win32.Build.0 = Release|Win32
+		{051FB72D-3788-4FDA-BA29-D940BC848BE3}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

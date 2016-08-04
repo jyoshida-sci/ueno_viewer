@@ -29,6 +29,9 @@
 
 #include "QClickableLabel.h"
 
+#include "..\libClustring\libClustring.h"
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
@@ -36,6 +39,13 @@
 //#include <libClustring\Clustring2D.h>
 //#include <libClustring\Clustring3D.h>
 //#include <libFitting\GaussianFitting.h>
+
+
+int myround(double x)
+{
+	return (int)(x < 0.0 ? x - 0.5 : x + 0.5);
+}
+
 
 
 ueno_viewer::ueno_viewer(QWidget *parent)
@@ -441,7 +451,7 @@ bool ueno_viewer::loadImg(){
 		this,
 		tr("Open files"),
 		dir.absolutePath(),
-		tr("JSON Files (*.json);Kanda-Dat Files (*.dat);;All Files (*)"));
+		tr("Kanda-Dat-Files JSON-Files (*.dat *.json);;All Files (*)"));
 	if(fileName.isEmpty())return false;
 
 	//dir path
@@ -484,6 +494,7 @@ void ueno_viewer::labMouseClicked(QMouseEvent* e){
 		myMenu.addAction("Get the darkest in 50layers");
 		myMenu.addAction("Set the start point");
 		myMenu.addAction("Set the end point");
+		myMenu.addAction("Clustring");
 
 		QAction* selectedItem = myMenu.exec(globalPos);
 		if (selectedItem){
@@ -541,6 +552,53 @@ void ueno_viewer::labMouseClicked(QMouseEvent* e){
 				str += QString("Angle theta= %1\n").arg(theta);
 
 				txt_clicked->setText(str);
+			}
+			else if (selectedItem->text() == "Clustring"){
+
+				std::vector<cluster2d> vc2;
+				std::vector<cluster3d> vc3;
+
+				for (int i = 0; i < vfmat.size(); i++){
+					std::vector<cluster2d> vc;
+					Clustring2D c  = Clustring2D();
+					vc = c.DoClustring2D(i, vfmat[i], 4.74);
+					for (int c = 0; c<vc.size(); c++){
+						vc2.push_back(vc[c]);
+					}
+				}
+
+				double d = 1.8;
+				double microscope50 = 0.26; //stage#3@50”{—¦‚ÌŽž‚Ì(?m/1pix)
+
+				Clustring3D c = Clustring3D();
+				vc3 = c.DoClustring3D(vc2, d, d);
+
+				for (int i = 0; i<vc3.size(); i++){
+					for (int j = i + 1; j<vc3.size(); j++){
+
+						double dist = sqrt((vc3[i].x - vc3[j].x)* microscope50* (vc3[i].x - vc3[j].x)* microscope50 + (vc3[i].y - vc3[j].y)* microscope50* (vc3[i].y - vc3[j].y)* microscope50 + (vc3[i].z - vc3[j].z)*(vc3[i].z - vc3[j].z));
+						if (dist < d){
+							vc3[i].isClusterd = true;
+							vc3[j].isClusterd = true;
+						}
+
+						if (dist < vc3[i].dist) vc3[i].dist = dist;
+						if (dist < vc3[j].dist) vc3[j].dist = dist;
+					}
+				}
+
+				for (int c = 0; c<vc3.size(); c++){
+					//fprintf(dist_brisum,"%.3d %.3d \n");
+
+					int n = (int)myround(vc3[c].z);
+					if (vc3[c].dist< 2 && vc3[c].brisum>200){
+						cv::circle(vomat[n], cv::Point(vc3[c].x, vc3[c].y), 1, cv::Scalar(255, 0, 0));
+					}
+					else{
+						cv::circle(vomat[n], cv::Point(vc3[c].x, vc3[c].y), 1, cv::Scalar(0, 255, 0));
+					}
+				}
+
 			}
 
 		}//if (selectedItem)
